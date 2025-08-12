@@ -17,11 +17,13 @@ public class AdminService {
     AdminMapper adminMapper;
     //增加数据
     public void add(Admin admin) {
+
         //账号查重
         Admin dbadmin = adminMapper.selectByUsername(admin.getUsername());
         if (dbadmin != null) {
             throw new CustomerException("账号重复");
         }
+
         //默认密码
         if(StrUtil.isBlank(admin.getPassword())){
             admin.setPassword("123456");
@@ -37,6 +39,13 @@ public class AdminService {
     //删除数据
     public void deleteById(Integer id) {
         adminMapper.deleteById(id);
+    }
+
+    //批量删除
+    public void deleteBatch(List<Admin> list) {
+        for (Admin admin : list) {
+            this.deleteById(admin.getId());
+        }
     }
 
     //查找数据

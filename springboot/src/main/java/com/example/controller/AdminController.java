@@ -21,15 +21,21 @@ public class AdminController {
         return Result.success();
     }
 
+    @PutMapping("/update")
+    public Result update(@RequestBody Admin admin) {//@RequestBody 接受前端的json参数
+        adminService.update(admin);
+        return Result.success();
+    }
+
     @DeleteMapping("/delete/{id}")
-    public Result update(@PathVariable Integer id) {//@PathVariable 接受前端传来的路径参数
+    public Result delete(@PathVariable Integer id) {//@PathVariable 接受前端传来的路径参数
         adminService.deleteById(id);
         return Result.success();
     }
 
-    @PutMapping("/update")
-    public Result update(@RequestBody Admin admin) {//@RequestBody 接受前端的json参数
-        adminService.update(admin);
+    @DeleteMapping("/deleteBatch")
+    public Result deleteBatch(@RequestBody List<Admin> list) {//@RequestBody 接受前端传来的json数组
+        adminService.deleteBatch(list);
         return Result.success();
     }
 
