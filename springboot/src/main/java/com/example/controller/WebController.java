@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WebController {
-
-    //  表示这是一个 get请求的接口
-
     @Resource
     AdminService adminService;
 
@@ -23,9 +20,9 @@ public class WebController {
         return Result.success("hello"); // 接口的返回值
     }
 
-    @GetMapping("/admin")
-    public Result admin(String name) {
-        String admin = adminService.admin(name);
-        return Result.success(admin);
+    @PostMapping("/login")
+    public Result login(@RequestBody Admin admin) {
+        Admin dbAdmin = adminService.login(admin);
+        return Result.success(dbAdmin);
     }
 }

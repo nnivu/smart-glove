@@ -7,16 +7,18 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 public interface AdminMapper {
-
-    List<Admin> selectAll(Admin admin);
-
     void insert(Admin admin);
 
-    @Select("select * from `admin` where username = #{username}")
-    Admin selectByUsername(String username);
-    
     void updateById(Admin admin);
 
     @Delete("delete from `admin` where id = #{id}")
     void deleteById(Integer id);
+
+    List<Admin> selectAll(Admin admin);
+
+    @Select("select * from `admin` where username = #{username}")
+    Admin selectByUsername(String username);
+
+    @Select("select * from `admin` where id = #{id}")
+    Admin selectById(Integer id);
 }
