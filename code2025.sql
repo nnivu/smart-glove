@@ -1,5 +1,5 @@
 ﻿# Host: localhost  (Version: 5.7.26)
-# Date: 2025-08-11 23:03:57
+# Date: 2025-08-20 07:27:13
 # Generator: MySQL-Front 5.3  (Build 4.234)
 
 /*!40101 SET NAMES utf8 */;
@@ -24,5 +24,5 @@ CREATE TABLE `admin` (
 #
 
 /*!40000 ALTER TABLE `admin` DISABLE KEYS */;
-INSERT INTO `admin` VALUES (1,'yuanweihua','han102513','yuan','18559151778','2964966950@qq.com');
+INSERT INTO `admin` VALUES (1,'yuanweihua','123456','yuan','18559151778','2964966950@qq.com');
 /*!40000 ALTER TABLE `admin` ENABLE KEYS */;
