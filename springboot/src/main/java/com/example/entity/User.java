@@ -1,9 +1,9 @@
 package com.example.entity;
 
 /**
- * 管理员信息
+ * 普通用户信息
  */
-public class Admin extends Account{
+public class User extends Account{
     private Integer id;
     private String username;
     private String password;

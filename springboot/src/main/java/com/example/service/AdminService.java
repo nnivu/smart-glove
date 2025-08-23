@@ -1,6 +1,7 @@
 package com.example.service;
 
 import cn.hutool.core.util.StrUtil;
+import com.example.entity.Account;
 import com.example.entity.Admin;
 import com.example.exception.CustomerException;
 import com.example.mapper.AdminMapper;
@@ -42,6 +43,7 @@ public class AdminService {
             admin.setPassword("123456"); // 实际项目中建议使用加密存储
         }
 
+        admin.setRole("admin");
         // 执行插入操作
         adminMapper.insert(admin);
     }
@@ -149,9 +151,9 @@ public class AdminService {
         return PageInfo.of(list);
     }
 
-    public Admin login(Admin admin) {
+    public Admin login(Account account) {
         // 根据用户名查询数据库
-        Admin dbAdmin = adminMapper.selectByUsername(admin.getUsername());
+        Admin dbAdmin = adminMapper.selectByUsername(account.getUsername());
 
         // 验证账号是否存在
         if (dbAdmin == null) {
@@ -159,11 +161,12 @@ public class AdminService {
         }
 
         // 验证密码是否正确
-        if (!dbAdmin.getPassword().equals(admin.getPassword())) {
+        if (!dbAdmin.getPassword().equals(account.getPassword())) {
             throw new CustomerException("账号或密码错误");
         }
 
         // 登录成功，返回管理员信息（实际项目中可移除敏感字段）
         return dbAdmin;
     }
+
 }

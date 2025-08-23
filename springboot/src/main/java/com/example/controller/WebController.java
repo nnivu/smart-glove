@@ -1,8 +1,10 @@
 package com.example.controller;
 
 import com.example.common.Result;
-import com.example.entity.Admin;
+import com.example.entity.Account;
+import com.example.entity.User;
 import com.example.service.AdminService;
+import com.example.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,17 +14,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class WebController {
     @Resource
+    UserService userService;
+    @Resource
     AdminService adminService;
 
-    //  表示这是一个 get请求的接口
-    @GetMapping("/hello") // 接口的路径，全局唯一的
+    @GetMapping("/hello")
     public Result hello() {
-        return Result.success("hello"); // 接口的返回值
+        return Result.success("hello");
     }
 
-    @PostMapping("/login")
-    public Result login(@RequestBody Admin admin) {
-        Admin dbAdmin = adminService.login(admin);
-        return Result.success(dbAdmin);
+    @PostMapping("/login")//登录
+    public Result login(@RequestBody Account account) {
+        Account dbAccount = null;
+        if ("admin".equals(account.getRole())) {
+            dbAccount = adminService.login(account);
+        } else if ("user".equals(account.getRole())) {
+            dbAccount = userService.login(account);
+        }
+        return Result.success(dbAccount);
+    }
+
+    @PostMapping("/register")//普通用户注册
+    public Result register(@RequestBody User user) {
+        userService.register(user);
+        return Result.success();
     }
 }
