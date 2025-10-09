@@ -8,12 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * 管理员模块控制器
- * 负责接收客户端发送的管理员相关HTTP请求，
- * 调用对应的服务层方法处理业务逻辑，并返回统一格式的响应结果
- * 遵循RESTful API设计规范，使用合适的HTTP方法和状态码
- */
 @RestController // 标识该类为REST风格控制器，所有方法返回数据默认会被转换为JSON格式
 @RequestMapping("/user") // 定义基础请求路径，当前控制器所有接口的URL前缀为 /user
 public class UserController {

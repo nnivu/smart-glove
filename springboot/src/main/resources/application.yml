@@ -11,3 +11,8 @@ mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
+# application.yml
+deepseek:
+  api-key: sk-fdd9196852e74707918fcaf2c03e0457 # 注意：冒号后必须加一个空格
+  api-url:  https://api.deepseek.com/v1  # 冒号后加空格
+  model: deepseek-chat  # 示例模型名，根据实际情况修改
