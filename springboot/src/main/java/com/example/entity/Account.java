@@ -1,8 +1,5 @@
 package com.example.entity;
 
-/**
- * 管理员信息
- */
 public class Account {
     private Integer id;
     private String username;
@@ -11,6 +8,11 @@ public class Account {
     private String phone;
     private String email;
     private String role;
+    private String token;
+
+    public String getToken() {return token;}
+
+    public void setToken(String token) {this.token = token;}
 
     public String getRole() {
         return role;

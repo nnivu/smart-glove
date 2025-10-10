@@ -5,6 +5,7 @@ import com.example.entity.Account;
 import com.example.entity.Admin;
 import com.example.exception.CustomerException;
 import com.example.mapper.AdminMapper;
+import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -121,6 +122,10 @@ public class AdminService {
         return admin;
     }
 
+    public Admin selectById(Integer id) {
+        return adminMapper.selectById(id);
+    }
+
     /**
      * 查询所有管理员信息
      * @return 管理员列表
@@ -165,6 +170,9 @@ public class AdminService {
             throw new CustomerException("账号或密码错误");
         }
 
+        //创建token并返回给前端
+        String token = TokenUtils.createToken(dbAdmin.getId()+"-"+"Admin",dbAdmin.getPassword());
+        dbAdmin.setToken(token);
         // 登录成功，返回管理员信息（实际项目中可移除敏感字段）
         return dbAdmin;
     }

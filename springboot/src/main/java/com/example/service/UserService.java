@@ -2,9 +2,11 @@ package com.example.service;
 
 import cn.hutool.core.util.StrUtil;
 import com.example.entity.Account;
+import com.example.entity.Admin;
 import com.example.entity.User;
 import com.example.exception.CustomerException;
 import com.example.mapper.UserMapper;
+import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -126,6 +128,10 @@ public class UserService {
         return user;
     }
 
+    public User selectById(Integer id) {
+        return userMapper.selectById(id);
+    }
+
     /**
      * 查询所有普通用户信息
      * @return 普通用户列表
@@ -169,6 +175,10 @@ public class UserService {
         if (!dbUser.getPassword().equals(account.getPassword())) {
             throw new CustomerException("账号或密码错误");
         }
+
+        //创建token并返回给前端
+        String token = TokenUtils.createToken(dbUser.getId()+"-"+"User",dbUser.getPassword());
+        dbUser.setToken(token);
 
         // 登录成功，返回普通用户信息（实际项目中可移除敏感字段）
         return dbUser;

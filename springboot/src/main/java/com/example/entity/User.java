@@ -12,6 +12,14 @@ public class User extends Account{
     private String email;
     private String role;
 
+    @Override
+    public String getToken() {return token;}
+
+    @Override
+    public void setToken(String token) {this.token = token;}
+
+    private String token;
+
     public String getRole() {
         return role;
     }

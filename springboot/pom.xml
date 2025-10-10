@@ -104,6 +104,14 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional> <!-- 可选依赖，不传递给其他模块 -->
 		</dependency>
+
+		<!-- JWT -->
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>4.3.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<!-- 构建配置 -->
