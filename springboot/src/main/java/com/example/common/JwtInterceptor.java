@@ -12,6 +12,7 @@ import com.example.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -31,7 +32,7 @@ public class JwtInterceptor implements HandlerInterceptor {
      * 请求处理前验证JWT令牌
      */
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) {
         // 1. 获取令牌（优先从请求头，其次从请求参数）
         String token = getTokenFromRequest(request);
         if (StrUtil.isBlank(token)) {

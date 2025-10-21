@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class DeepSeekQuestionService {
@@ -76,7 +73,7 @@ public class DeepSeekQuestionService {
                 throw new IOException("API调用失败: " + response.code() + " " + response.message());
             }
 
-            String responseBody = response.body().string();
+            String responseBody = Objects.requireNonNull(response.body()).string();
             JsonNode jsonNode = objectMapper.readTree(responseBody);
 
             // 解析响应获取回答内容（根据DeepSeek API格式调整）

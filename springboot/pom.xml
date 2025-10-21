@@ -112,6 +112,15 @@
 			<version>4.3.0</version>
 		</dependency>
 
+		<!-- Lombok 工具依赖：用于简化实体类代码（自动生成getter/setter/toString等方法） -->
+		<!-- 通过注解（如@Data、@Getter、@Setter）替代手动编写重复代码，减少模板代码量 -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>          <!-- 依赖版本，1.18.x系列稳定且兼容性较好 -->
+			<scope>provided</scope>
+		</dependency>
+
 	</dependencies>
 
 	<!-- 构建配置 -->

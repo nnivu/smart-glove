@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 命名空间必须与接口全限定名一致 -->
+<mapper namespace="com.example.mapper.RiskFactorMapper">
+
+    <!-- 查询所有风险因素 -->
+    <select id="selectAll" resultType="com.example.entity.RiskFactor">
+        SELECT
+            id,
+            name,
+            probability,  -- 发生概率
+            impact_level AS impactLevel,  -- 影响程度（驼峰映射）
+            related_area AS relatedArea,  -- 关联区域（驼峰映射）
+            description,  -- 风险描述（可选）
+            create_time AS createTime  -- 创建时间（可选）
+        FROM risk_factor
+        ORDER BY probability * impact_level DESC  -- 按风险分数降序
+    </select>
+
+</mapper>

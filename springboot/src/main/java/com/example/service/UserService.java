@@ -2,7 +2,6 @@ package com.example.service;
 
 import cn.hutool.core.util.StrUtil;
 import com.example.entity.Account;
-import com.example.entity.Admin;
 import com.example.entity.User;
 import com.example.exception.CustomerException;
 import com.example.mapper.UserMapper;
