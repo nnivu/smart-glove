@@ -3,7 +3,7 @@ package com.example.service;
 import cn.hutool.core.util.StrUtil;
 import com.example.entity.Account;
 import com.example.entity.Admin;
-import com.example.exception.CustomerException;
+import com.example.exception.BusinessException;
 import com.example.mapper.AdminMapper;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
@@ -30,13 +30,13 @@ public class AdminService {
      * 添加新管理员
      * 包含账号查重、默认密码设置等业务逻辑
      * @param admin 管理员实体对象
-     * @throws CustomerException 当账号已存在时抛出异常
+     * @throws BusinessException 当账号已存在时抛出异常
      */
     public void add(Admin admin) {
         // 账号唯一性校验
         Admin dbAdmin = adminMapper.selectByUsername(admin.getUsername());
         if (dbAdmin != null) {
-            throw new CustomerException("账号已存在，请更换用户名");
+            throw new BusinessException("账号已存在，请更换用户名");
         }
 
         // 若未设置密码，使用默认密码
@@ -52,13 +52,13 @@ public class AdminService {
     /**
      * 更新管理员信息
      * @param admin 包含更新信息的管理员实体（必须包含ID）
-     * @throws CustomerException 当管理员不存在时抛出异常
+     * @throws BusinessException 当管理员不存在时抛出异常
      */
     public void update(Admin admin) {
         // 验证管理员是否存在
         Admin existingAdmin = adminMapper.selectById(admin.getId());
         if (existingAdmin == null) {
-            throw new CustomerException("管理员不存在，无法更新");
+            throw new BusinessException("管理员不存在，无法更新");
         }
 
         // 执行更新操作
@@ -68,13 +68,13 @@ public class AdminService {
     /**
      * 根据ID删除管理员
      * @param id 管理员ID
-     * @throws CustomerException 当管理员不存在时抛出异常
+     * @throws BusinessException 当管理员不存在时抛出异常
      */
     public void deleteById(Integer id) {
         // 验证管理员是否存在
         Admin admin = adminMapper.selectById(id);
         if (admin == null) {
-            throw new CustomerException("管理员不存在，无法删除");
+            throw new BusinessException("管理员不存在，无法删除");
         }
 
         // 执行删除操作
@@ -89,7 +89,7 @@ public class AdminService {
     @Transactional
     public void deleteBatch(List<Admin> list) {
         if (list == null || list.isEmpty()) {
-            throw new CustomerException("请选择要删除的管理员");
+            throw new BusinessException("请选择要删除的管理员");
         }
 
         for (Admin admin : list) {
@@ -102,12 +102,12 @@ public class AdminService {
      * 根据名称查询管理员信息
      * @param name 管理员名称
      * @return 管理员实体对象
-     * @throws CustomerException 当管理员不存在或名称为空时抛出异常
+     * @throws BusinessException 当管理员不存在或名称为空时抛出异常
      */
     public Admin getAdminByName(String name) {
         // 参数校验
         if (StrUtil.isBlank(name)) {
-            throw new CustomerException("管理员名称不能为空");
+            throw new BusinessException("管理员名称不能为空");
         }
 
         // 从数据库查询管理员信息
@@ -115,7 +115,7 @@ public class AdminService {
 
         // 验证查询结果
         if (admin == null) {
-            throw new CustomerException("管理员不存在");
+            throw new BusinessException("管理员不存在");
         }
 
         // 返回查询到的管理员对象（实际项目中可考虑返回DTO，隐藏敏感字段）
@@ -162,12 +162,12 @@ public class AdminService {
 
         // 验证账号是否存在
         if (dbAdmin == null) {
-            throw new CustomerException("账号不存在");
+            throw new BusinessException("账号不存在");
         }
 
         // 验证密码是否正确
         if (!dbAdmin.getPassword().equals(account.getPassword())) {
-            throw new CustomerException("账号或密码错误");
+            throw new BusinessException("账号或密码错误");
         }
 
         //创建token并返回给前端

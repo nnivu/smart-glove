@@ -6,7 +6,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.example.entity.Account;
-import com.example.exception.CustomerException;
+import com.example.exception.BusinessException;
 import com.example.service.AdminService;
 import com.example.service.UserService;
 import jakarta.annotation.Resource;
@@ -36,13 +36,13 @@ public class JwtInterceptor implements HandlerInterceptor {
         // 1. 获取令牌（优先从请求头，其次从请求参数）
         String token = getTokenFromRequest(request);
         if (StrUtil.isBlank(token)) {
-            throw new CustomerException("401", "令牌不存在，拒绝访问");
+            throw new BusinessException("401", "令牌不存在，拒绝访问");
         }
 
         // 2. 解析令牌并验证用户信息
         Account account = verifyTokenAndGetAccount(token);
         if (account == null) {
-            throw new CustomerException("401", "用户信息不存在，拒绝访问");
+            throw new BusinessException("401", "用户信息不存在，拒绝访问");
         }
 
         // 3. 验证令牌签名
@@ -72,7 +72,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             // 解析令牌载荷（audience中存储格式：userId-role）
             String audience = JWT.decode(token).getAudience().get(0);
             if (StrUtil.isBlank(audience) || !audience.contains("-")) {
-                throw new CustomerException("401", "令牌格式错误");
+                throw new BusinessException("401", "令牌格式错误");
             }
 
             String[] split = audience.split("-", 2); // 限制拆分次数，避免角色中包含"-"
@@ -86,13 +86,13 @@ public class JwtInterceptor implements HandlerInterceptor {
             return getAccountByRole(userId, role);
 
         } catch (JWTDecodeException e) {
-            throw new CustomerException("401", "令牌解析失败");
+            throw new BusinessException("401", "令牌解析失败");
         } catch (NumberFormatException e) {
-            throw new CustomerException("401", "用户ID格式错误");
-        } catch (CustomerException e) {
+            throw new BusinessException("401", "用户ID格式错误");
+        } catch (BusinessException e) {
             throw e; // 抛出已定义的业务异常
         } catch (Exception e) {
-            throw new CustomerException("401", "令牌验证失败");
+            throw new BusinessException("401", "令牌验证失败");
         }
     }
 
@@ -101,7 +101,7 @@ public class JwtInterceptor implements HandlerInterceptor {
      */
     private Integer parseUserId(String userIdStr) {
         if (StrUtil.isBlank(userIdStr)) {
-            throw new CustomerException("401", "用户ID为空");
+            throw new BusinessException("401", "用户ID为空");
         }
         return Integer.parseInt(userIdStr);
     }
@@ -115,7 +115,7 @@ public class JwtInterceptor implements HandlerInterceptor {
         } else if ("USER".equals(role)) {
             return userService.selectById(userId);
         } else {
-            throw new CustomerException("401", "无效的角色类型");
+            throw new BusinessException("401", "无效的角色类型");
         }
     }
 
@@ -128,7 +128,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token); // 验证签名和过期时间等
         } catch (Exception e) {
-            throw new CustomerException("401", "令牌签名无效或已过期");
+            throw new BusinessException("401", "令牌签名无效或已过期");
         }
     }
 }

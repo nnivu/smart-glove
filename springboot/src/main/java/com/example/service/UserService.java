@@ -3,7 +3,7 @@ package com.example.service;
 import cn.hutool.core.util.StrUtil;
 import com.example.entity.Account;
 import com.example.entity.User;
-import com.example.exception.CustomerException;
+import com.example.exception.BusinessException;
 import com.example.mapper.UserMapper;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
@@ -30,13 +30,13 @@ public class UserService {
      * 添加新普通用户
      * 包含账号查重、默认密码设置等业务逻辑
      * @param user 普通用户实体对象
-     * @throws CustomerException 当账号已存在时抛出异常
+     * @throws BusinessException 当账号已存在时抛出异常
      */
     public void add(User user) {
         // 账号唯一性校验
         User dbUser = userMapper.selectByUsername(user.getUsername());
         if (dbUser != null) {
-            throw new CustomerException("账号已存在，请更换用户名");
+            throw new BusinessException("账号已存在，请更换用户名");
         }
 
         // 若未设置密码，使用默认密码
@@ -57,13 +57,13 @@ public class UserService {
     /**
      * 更新普通用户信息
      * @param user 包含更新信息的普通用户实体（必须包含ID）
-     * @throws CustomerException 当普通用户不存在时抛出异常
+     * @throws BusinessException 当普通用户不存在时抛出异常
      */
     public void update(User user) {
         // 验证普通用户是否存在
         User existingUser = userMapper.selectById(user.getId());
         if (existingUser == null) {
-            throw new CustomerException("普通用户不存在，无法更新");
+            throw new BusinessException("普通用户不存在，无法更新");
         }
 
         // 执行更新操作
@@ -73,13 +73,13 @@ public class UserService {
     /**
      * 根据ID删除普通用户
      * @param id 普通用户ID
-     * @throws CustomerException 当普通用户不存在时抛出异常
+     * @throws BusinessException 当普通用户不存在时抛出异常
      */
     public void deleteById(Integer id) {
         // 验证普通用户是否存在
         User user = userMapper.selectById(id);
         if (user == null) {
-            throw new CustomerException("普通用户不存在，无法删除");
+            throw new BusinessException("普通用户不存在，无法删除");
         }
 
         // 执行删除操作
@@ -94,7 +94,7 @@ public class UserService {
     @Transactional
     public void deleteBatch(List<User> list) {
         if (list == null || list.isEmpty()) {
-            throw new CustomerException("请选择要删除的普通用户");
+            throw new BusinessException("请选择要删除的普通用户");
         }
 
         for (User user : list) {
@@ -107,12 +107,12 @@ public class UserService {
      * 根据名称查询普通用户信息
      * @param name 普通用户名称
      * @return 普通用户实体对象
-     * @throws CustomerException 当普通用户不存在或名称为空时抛出异常
+     * @throws BusinessException 当普通用户不存在或名称为空时抛出异常
      */
     public User getUserByName(String name) {
         // 参数校验
         if (StrUtil.isBlank(name)) {
-            throw new CustomerException("普通用户名称不能为空");
+            throw new BusinessException("普通用户名称不能为空");
         }
 
         // 从数据库查询普通用户信息
@@ -120,7 +120,7 @@ public class UserService {
 
         // 验证查询结果
         if (user == null) {
-            throw new CustomerException("普通用户不存在");
+            throw new BusinessException("普通用户不存在");
         }
 
         // 返回查询到的普通用户对象（实际项目中可考虑返回DTO，隐藏敏感字段）
@@ -167,12 +167,12 @@ public class UserService {
 
         // 验证账号是否存在
         if (dbUser == null) {
-            throw new CustomerException("账号不存在");
+            throw new BusinessException("账号不存在");
         }
 
         // 验证密码是否正确
         if (!dbUser.getPassword().equals(account.getPassword())) {
-            throw new CustomerException("账号或密码错误");
+            throw new BusinessException("账号或密码错误");
         }
 
         //创建token并返回给前端
