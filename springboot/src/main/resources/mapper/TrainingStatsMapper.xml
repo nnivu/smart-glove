@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.TrainingStatsMapper">
+
+    <!-- 结果映射：实体与数据库表字段映射 -->
+    <resultMap id="TrainingStatsResultMap" type="com.example.entity.TrainingStats">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="training_times" property="trainingTimes" jdbcType="INTEGER"/>
+        <result column="avg_score" property="avgScore" jdbcType="DOUBLE"/>
+        <result column="error_rate" property="errorRate" jdbcType="DOUBLE"/>
+        <result column="accuracy" property="accuracy" jdbcType="DOUBLE"/>
+        <result column="level" property="level" jdbcType="VARCHAR"/>
+        <result column="certification" property="certification" jdbcType="VARCHAR"/>
+        <result column="stats_date" property="statsDate" jdbcType="TIMESTAMP"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 根据时间范围查询训练统计 -->
+    <select id="selectByDateRange" resultMap="TrainingStatsResultMap">
+        SELECT
+            id, training_times, avg_score, error_rate, accuracy,
+            level, certification, stats_date, create_time, update_time
+        FROM t_training_stats
+        WHERE stats_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY stats_date DESC
+            LIMIT 1
+    </select>
+
+</mapper>
