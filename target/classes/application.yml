@@ -8,7 +8,7 @@ spring:
     password: root
     url: jdbc:mysql://localhost:3306/code2025?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
 
-# ✅ 原生MyBatis配置
+# 原生MyBatis配置
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.entity  # 实体类包路径
