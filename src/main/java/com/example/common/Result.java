@@ -1,5 +1,6 @@
 package com.example.common;
 
+import cn.hutool.core.util.StrUtil;
 import com.example.exception.BusinessException;
 import com.example.common.ResultCode;
 import lombok.Getter;
@@ -19,7 +20,7 @@ public class Result<T> {
     private Result(String code, T data, String message) {
         this.code = code;
         this.data = data;
-        this.message = message;
+        this.message = StrUtil.isBlank(message) ? ResultCode.SUCCESS.getMsg() : message;
     }
 
     /**
@@ -37,9 +38,17 @@ public class Result<T> {
     }
 
     /**
-     * 成功：自定义提示信息
+     * 成功：自定义提示信息（数据在前，提示语在后）
      */
     public static <T> Result<T> success(T data, String message) {
+        return new Result<>(ResultCode.SUCCESS.getCode(), data, message);
+    }
+
+    /**
+     * 新增：成功 - 自定义提示信息（提示语在前，数据在后）
+     * 适配登录接口的调用方式：Result.success("登录成功", data)
+     */
+    public static <T> Result<T> success(String message, T data) {
         return new Result<>(ResultCode.SUCCESS.getCode(), data, message);
     }
 

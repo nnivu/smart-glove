@@ -1,60 +1,82 @@
 package com.example.common;
 
 import cn.hutool.core.util.StrUtil;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.example.entity.Account;
-import com.example.exception.BusinessException;
 import com.example.service.AdminService;
 import com.example.service.UserService;
+import com.example.utils.TokenUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * JWT令牌拦截器，用于验证请求中的令牌合法性
+ * JWT令牌拦截器（适配网页登录场景，使用Jackson返回JSON，无需Fastjson2）
  */
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
 
     @Resource
     private AdminService adminService;
-
     @Resource
     private UserService userService;
+    @Resource
+    private TokenUtils tokenUtils;
+
+    // 初始化Jackson的ObjectMapper（Spring Boot内置，无需额外依赖）
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 请求处理前验证JWT令牌
      */
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) {
-        // 1. 获取令牌（优先从请求头，其次从请求参数）
+        // 1. 获取Token（优先请求头，其次请求参数）
         String token = getTokenFromRequest(request);
         if (StrUtil.isBlank(token)) {
-            throw new BusinessException("401", "令牌不存在，拒绝访问");
+            // 返回401 JSON，前端捕获后跳登录页
+            returnJson(response, 401, "未登录，请先登录");
+            return false;
         }
 
-        // 2. 解析令牌并验证用户信息
-        Account account = verifyTokenAndGetAccount(token);
-        if (account == null) {
-            throw new BusinessException("401", "用户信息不存在，拒绝访问");
+        try {
+            // 2. 解析Token中的用户ID和角色
+            String[] tokenData = tokenUtils.parseTokenData(token);
+            Integer userId = parseUserId(tokenData[0]);
+            String role = tokenData[1];
+
+            // 3. 根据角色查询用户
+            Account account = getAccountByRole(userId, role);
+            if (account == null) {
+                returnJson(response, 401, "用户信息不存在");
+                return false;
+            }
+
+            // 4. 验证Token签名和过期时间
+            tokenUtils.verifyTokenSignature(token);
+
+            // 5. 将用户信息存入请求，供业务层直接获取
+            request.setAttribute("currentAccount", account);
+            return true;
+
+        } catch (Exception e) {
+            // 细分异常提示，方便前端处理
+            String msg = e.getMessage().contains("过期") ? "登录已过期，请重新登录" : "Token验证失败：" + e.getMessage();
+            returnJson(response, 401, msg);
+            return false;
         }
-
-        // 3. 验证令牌签名
-        verifyTokenSignature(token, account.getPassword());
-
-        // 4. 将用户信息存入请求属性，供后续控制器使用
-        request.setAttribute("currentAccount", account);
-        return true;
     }
 
     /**
-     * 从请求中获取令牌（请求头优先，其次请求参数）
+     * 从请求中获取Token
      */
     private String getTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader("token");
@@ -65,70 +87,49 @@ public class JwtInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * 解析令牌并获取对应的用户账户
-     */
-    private Account verifyTokenAndGetAccount(String token) {
-        try {
-            // 解析令牌载荷（audience中存储格式：userId-role）
-            String audience = JWT.decode(token).getAudience().getFirst();
-            if (StrUtil.isBlank(audience) || !audience.contains("-")) {
-                throw new BusinessException("401", "令牌格式错误");
-            }
-
-            String[] split = audience.split("-", 2); // 限制拆分次数，避免角色中包含"-"
-            String userIdStr = split[0];
-            String role = split[1];
-
-            // 转换userId为Integer（若实际业务为String，可删除此步直接使用）
-            Integer userId = parseUserId(userIdStr);
-
-            // 根据角色查询对应账户
-            return getAccountByRole(userId, role);
-
-        } catch (JWTDecodeException e) {
-            throw new BusinessException("401", "令牌解析失败");
-        } catch (NumberFormatException e) {
-            throw new BusinessException("401", "用户ID格式错误");
-        } catch (BusinessException e) {
-            throw e; // 抛出已定义的业务异常
-        } catch (Exception e) {
-            throw new BusinessException("401", "令牌验证失败");
-        }
-    }
-
-    /**
-     * 将用户ID字符串转换为Integer（若ID为字符串类型，可删除此方法）
+     * 转换用户ID为Integer
      */
     private Integer parseUserId(String userIdStr) {
         if (StrUtil.isBlank(userIdStr)) {
-            throw new BusinessException("401", "用户ID为空");
+            throw new RuntimeException("用户ID为空");
         }
-        return Integer.parseInt(userIdStr);
+        try {
+            return Integer.parseInt(userIdStr);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("用户ID格式错误");
+        }
     }
 
     /**
-     * 根据角色查询对应的用户账户
+     * 根据角色查询对应用户
      */
     private Account getAccountByRole(Integer userId, String role) {
-        if ("ADMIN".equals(role)) {
+        if ("admin".equals(role)) {
             return adminService.selectById(userId);
-        } else if ("USER".equals(role)) {
+        } else if ("user".equals(role)) {
             return userService.selectById(userId);
         } else {
-            throw new BusinessException("401", "无效的角色类型");
+            throw new RuntimeException("无效的角色类型：" + role);
         }
     }
 
     /**
-     * 验证令牌签名是否有效
+     * 核心修改：使用Jackson返回JSON格式响应（替代Fastjson2）
      */
-    private void verifyTokenSignature(String token, String secret) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            JWTVerifier verifier = JWT.require(algorithm).build();
-            verifier.verify(token); // 验证签名和过期时间等
+    private void returnJson(HttpServletResponse response, int code, String msg) {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401状态码
+        try (PrintWriter writer = response.getWriter()) {
+            // 构建返回结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("code", code);
+            result.put("msg", msg);
+            // 使用Jackson将Map转为JSON字符串（Spring Boot内置，无需额外依赖）
+            writer.write(objectMapper.writeValueAsString(result));
+            writer.flush();
         } catch (Exception e) {
-            throw new BusinessException("401", "令牌签名无效或已过期");
+            e.printStackTrace();
         }
     }
 }
