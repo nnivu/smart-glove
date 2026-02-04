@@ -15,7 +15,7 @@
 
     <insert id="insert">
         insert into`user`(username,password,name,phone,email,role)
-        values(#{username},#{password},#{name},#{phone},#{email},#{role}）
+        values(#{username},#{password},#{name},#{phone},#{email},#{role})
     </insert>
     
     <insert id="updateById">

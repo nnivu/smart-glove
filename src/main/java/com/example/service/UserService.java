@@ -46,23 +46,29 @@ public class UserService {
             throw new BusinessException("账号已存在，请更换用户名");
         }
 
-        // 若未设置密码，使用默认密码并加密
+        // 新增：固定盐值强度为10（兼容所有BCrypt版本）
+        int saltRounds = 10;
+        String salt = BCrypt.gensalt(saltRounds);
+
+        // 密码加密逻辑（用固定盐值）
         if(StrUtil.isBlank(user.getPassword())){
             String defaultPwd = "123456";
-            // BCrypt加密默认密码（核心修改：不再存储明文）
-            user.setPassword(BCrypt.hashpw(defaultPwd, BCrypt.gensalt()));
+            String encryptDefaultPwd = BCrypt.hashpw(defaultPwd, salt);
+            System.out.println("【注册日志】用户名：" + user.getUsername() + "，默认密码加密后：" + encryptDefaultPwd);
+            user.setPassword(encryptDefaultPwd);
         } else {
-            // 对传入的密码进行加密存储（核心修改）
-            user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+            // 清洗密码（去空格）
+            String cleanPwd = StrUtil.trim(user.getPassword());
+            String encryptPwd = BCrypt.hashpw(cleanPwd, salt);
+            System.out.println("【注册日志】用户名：" + user.getUsername() + "，明文密码：" + cleanPwd + "，加密后：" + encryptPwd);
+            user.setPassword(encryptPwd);
         }
 
-        // 修复bug：原逻辑user.setName(user.getName())是无效赋值，改为用用户名作为默认昵称
+        // 原有逻辑：昵称兜底
         if(StrUtil.isBlank(user.getName())){
             user.setName(user.getUsername());
         }
-
         user.setRole("user");
-        // 执行插入操作
         userMapper.insert(user);
     }
 
@@ -211,32 +217,35 @@ public class UserService {
      * @return 登录成功的用户信息（含Token）
      */
     public User login(Account account) {
-        // 参数校验
-        if (StrUtil.isBlank(account.getUsername()) || StrUtil.isBlank(account.getPassword())) {
+        // 参数校验+清洗
+        String username = StrUtil.trim(account.getUsername());
+        String password = StrUtil.trim(account.getPassword());
+        if (StrUtil.isBlank(username) || StrUtil.isBlank(password)) {
             throw new BusinessException("账号或密码不能为空");
         }
 
-        // 根据用户名查询数据库
-        User dbUser = userMapper.selectByUsername(account.getUsername());
-
-        // 验证账号是否存在
+        // 查询用户
+        User dbUser = userMapper.selectByUsername(username);
         if (dbUser == null) {
             throw new BusinessException("账号不存在");
         }
 
-        // 核心修改：使用BCrypt验证密码（适配加密存储）
-        if (!BCrypt.checkpw(account.getPassword(), dbUser.getPassword())) {
+        // 核心：直接校验，日志精准
+        boolean isMatch = BCrypt.checkpw(password, dbUser.getPassword());
+        System.out.println("【登录日志】用户名：" + username);
+        System.out.println("【登录日志】明文密码：" + password);
+        System.out.println("【登录日志】数据库密文：" + dbUser.getPassword());
+        System.out.println("【登录日志】匹配结果：" + isMatch);
+
+        if (!isMatch) {
             throw new BusinessException("账号或密码错误");
         }
 
-        // 核心修改：改用TokenUtils生成Token（固定秘钥，传入用户ID和角色）
+        // 生成Token+隐藏密码
         String token = tokenUtils.createToken(dbUser.getId().toString(), "user");
         dbUser.setToken(token);
-
-        // 隐藏敏感字段（核心修改：不返回密码）
         dbUser.setPassword(null);
 
-        // 登录成功，返回用户信息（含Token）
         return dbUser;
     }
 

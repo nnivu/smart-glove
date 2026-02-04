@@ -11,7 +11,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: root
+    password: gh178
     url: jdbc:mysql://localhost:3306/code2025?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
   # 新增：确保JSON返回格式正常（适配拦截器返回JSON）
   jackson:
